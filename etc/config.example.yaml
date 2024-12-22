@@ -1,0 +1,37 @@
+---
+
+log_level: Info
+
+window_event_handlers:
+  # Execute shell command when window becomes fullscreen
+  - condition_list:
+      - EventType: FullscreenMode
+      - NodeFullscreenMode: Fullscreen
+    action:
+      ShellCommand:
+        command: ~/.config/i3/scripts/brightness_autoset.sh 100
+
+  # Execute shell command when window exits fullscreen
+  - condition_list:
+      - EventType: FullscreenMode
+      - NodeFullscreenMode: None
+    action:
+      ShellCommand:
+        command: ~/.config/i3/scripts/brightness_autoset.sh
+
+  # Execute shell command when window title matches regex
+  - condition_list:
+      - EventType: New
+      - Title:
+          Regex:
+            regex: 'jitsi.*is sharing'
+    action:
+      ShellCommand:
+        command: xdotool windowclose "$I3IM_CONTAINER_WINDOW_ID"
+
+workspace_event_handlers:
+  - condition_list:
+      - EventType: Focus
+    action:
+      ShellCommand:
+        command: ~/.config/i3/scripts/brightness_autoset.sh 100
