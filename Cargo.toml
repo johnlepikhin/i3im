@@ -23,6 +23,6 @@ slog = "2.7"
 slog-envlogger = "2.2"
 slog-scope = "4.4"
 slog-stdlog = "4.1.1"
-slog-syslog = { git = "https://github.com/johnlepikhin/syslog", branch = "fix/loglevel-compare" }
+slog-syslog-jl = "0.13.1"
 slog-term = "2.9.1"
 structdoc = "0.1.4"

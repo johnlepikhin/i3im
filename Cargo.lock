@@ -284,7 +284,7 @@ dependencies = [
  "slog-envlogger",
  "slog-scope",
  "slog-stdlog",
- "slog-syslog",
+ "slog-syslog-jl",
  "slog-term",
  "structdoc",
 ]
@@ -591,9 +591,10 @@ dependencies = [
 ]
 
 [[package]]
-name = "slog-syslog"
-version = "0.13.0"
-source = "git+https://github.com/johnlepikhin/syslog?branch=fix/loglevel-compare#cb45df5abfd1241d877e8a1b6c139ed883fa92fb"
+name = "slog-syslog-jl"
+version = "0.13.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "19a43581a5afafda759619d77a2c202e0a762ae094a9eeaa7647984049dc1426"
 dependencies = [
  "slog",
  "syslog",

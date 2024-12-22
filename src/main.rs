@@ -89,8 +89,8 @@ struct Application {
 
 impl Application {
     fn init_syslog_logger(log_level: slog::Level) -> Result<()> {
-        let logger = slog_syslog::SyslogBuilder::new()
-            .facility(slog_syslog::Facility::LOG_USER)
+        let logger = slog_syslog_jl::SyslogBuilder::new()
+            .facility(slog_syslog_jl::Facility::LOG_USER)
             .level(log_level)
             .unix("/dev/log")
             .start()?;
