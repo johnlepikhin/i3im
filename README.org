@@ -25,7 +25,7 @@ Install the project:
 cargo install --git https://github.com/johnlepikhin/i3im
 #+END_SRC
 
-* Getting Started
+* Getting started
 
 The utility has a robust command-line interface. Don’t hesitate to call it with --help.
 
@@ -35,7 +35,7 @@ To start, you need to create a configuration file. You can do this with the foll
 i3im config generate > $HOME/.config/i3im.yaml
 #+END_SRC
 
-* Workspace Groups
+* Workspace groups
 
 Add the following to your i3 configuration:
 
@@ -60,7 +60,7 @@ Now, with the $mod+Shift+s key combination, you can create a new workspace group
 workspaces works with the usual keys. You can return to the default group (which has no name) using the same key
 combination — $mod+Shift+s. Similarly, you can create multiple workspace groups if needed.
 
-* Event Handler
+* Event handler
 
 i3im can operate in event-handler mode. To do this, run:
 
@@ -79,7 +79,7 @@ You can see the full list of available conditions and actions by calling the con
 i3im config documentation
 #+END_SRC
 
-** Example: Increasing Brightness for Fullscreen Windows
+** Example: Increasing brightness for fullscreen windows
 
 Add the following to your configuration:
 
@@ -128,7 +128,7 @@ brightnessctl brightnessctl -m | cut -d, -f4 | tr -d % > "$STATE_FILE"
 brightnessctl set "${BRIGHTNESS}%"
 #+END_SRC
 
-** Example: Automatically Closing Jitsi Sharing Notification Windows
+** Example: Automatically closing Jitsi sharing notification windows
 
 Many find it annoying that the Jitsi video conferencing system automatically shows a notification window about sharing.
 You can automatically close it using the following workaround:
@@ -148,7 +148,7 @@ window_event_handlers:
         command: xdotool windowclose "$I3IM_CONTAINER_WINDOW_ID"
 #+END_SRC
 
-** Example: Retrieving Environment Variables
+** Example: Retrieving environment variables
 
 In the example above, you may have noticed the environment variable ~$I3IM_CONTAINER_WINDOW_ID~. To retrieve the full
 list of variables, you can attach an empty condition to an event:
