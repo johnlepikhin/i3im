@@ -1,6 +1,25 @@
 use serde::{Deserialize, Serialize};
 use structdoc::StructDoc;
 
+fn get_window_property(
+    window: &i3ipc::reply::Node,
+    property: i3ipc::reply::WindowProperty,
+) -> Option<&str> {
+    window
+        .window_properties
+        .as_ref()
+        .and_then(|window_properties| window_properties.get(&property).map(|v| v.as_str()))
+}
+
+fn get_opt_window_property(
+    window: &Option<i3ipc::reply::Node>,
+    property: i3ipc::reply::WindowProperty,
+) -> Option<&str> {
+    window
+        .as_ref()
+        .and_then(|window| get_window_property(window, property))
+}
+
 #[derive(Clone, Serialize, Deserialize)]
 pub struct ConfigRegex {
     /// The regular expression
@@ -314,69 +333,34 @@ pub mod window {
                 Self::Urgent(v) => *v == event.container.urgent,
                 Self::Focused(v) => *v == event.container.focused,
                 Self::Sticky(v) => *v == event.container.sticky,
-                Self::Title(v) => {
-                    v.matches_option(event.container.window_properties.as_ref().and_then(
-                        |window_properties| {
-                            window_properties
-                                .get(&i3ipc::reply::WindowProperty::Title)
-                                .map(|v| v.as_str())
-                        },
-                    ))
-                }
-                Self::Instance(v) => {
-                    v.matches_option(event.container.window_properties.as_ref().and_then(
-                        |window_properties| {
-                            window_properties
-                                .get(&i3ipc::reply::WindowProperty::Instance)
-                                .map(|v| v.as_str())
-                        },
-                    ))
-                }
-                Self::Class(v) => {
-                    v.matches_option(event.container.window_properties.as_ref().and_then(
-                        |window_properties| {
-                            window_properties
-                                .get(&i3ipc::reply::WindowProperty::Class)
-                                .map(|v| v.as_str())
-                        },
-                    ))
-                }
-                Self::WindowRole(v) => {
-                    v.matches_option(event.container.window_properties.as_ref().and_then(
-                        |window_properties| {
-                            window_properties
-                                .get(&i3ipc::reply::WindowProperty::WindowRole)
-                                .map(|v| v.as_str())
-                        },
-                    ))
-                }
-                Self::TransientFor(v) => {
-                    v.matches_option(event.container.window_properties.as_ref().and_then(
-                        |window_properties| {
-                            window_properties
-                                .get(&i3ipc::reply::WindowProperty::TransientFor)
-                                .map(|v| v.as_str())
-                        },
-                    ))
-                }
-                Self::Machine(v) => {
-                    v.matches_option(event.container.window_properties.as_ref().and_then(
-                        |window_properties| {
-                            window_properties
-                                .get(&i3ipc::reply::WindowProperty::Machine)
-                                .map(|v| v.as_str())
-                        },
-                    ))
-                }
-                Self::Mark(v) => {
-                    v.matches_option(event.container.window_properties.as_ref().and_then(
-                        |window_properties| {
-                            window_properties
-                                .get(&i3ipc::reply::WindowProperty::Mark)
-                                .map(|v| v.as_str())
-                        },
-                    ))
-                }
+                Self::Title(v) => v.matches_option(super::get_window_property(
+                    &event.container,
+                    i3ipc::reply::WindowProperty::Title,
+                )),
+                Self::Instance(v) => v.matches_option(super::get_window_property(
+                    &event.container,
+                    i3ipc::reply::WindowProperty::Instance,
+                )),
+                Self::Class(v) => v.matches_option(super::get_window_property(
+                    &event.container,
+                    i3ipc::reply::WindowProperty::Class,
+                )),
+                Self::WindowRole(v) => v.matches_option(super::get_window_property(
+                    &event.container,
+                    i3ipc::reply::WindowProperty::WindowRole,
+                )),
+                Self::TransientFor(v) => v.matches_option(super::get_window_property(
+                    &event.container,
+                    i3ipc::reply::WindowProperty::TransientFor,
+                )),
+                Self::Machine(v) => v.matches_option(super::get_window_property(
+                    &event.container,
+                    i3ipc::reply::WindowProperty::Machine,
+                )),
+                Self::Mark(v) => v.matches_option(super::get_window_property(
+                    &event.container,
+                    i3ipc::reply::WindowProperty::Mark,
+                )),
             }
         }
     }
@@ -525,98 +509,34 @@ pub mod workspace {
                     .as_ref()
                     .map(|container| *v == container.sticky)
                     .unwrap_or_default(),
-                Self::OldTitle(v) => event
-                    .old
-                    .as_ref()
-                    .map(|container| {
-                        v.matches_option(container.window_properties.as_ref().and_then(
-                            |window_properties| {
-                                window_properties
-                                    .get(&i3ipc::reply::WindowProperty::Title)
-                                    .map(|v| v.as_str())
-                            },
-                        ))
-                    })
-                    .unwrap_or_default(),
-                Self::OldInstance(v) => event
-                    .old
-                    .as_ref()
-                    .map(|container| {
-                        v.matches_option(container.window_properties.as_ref().and_then(
-                            |window_properties| {
-                                window_properties
-                                    .get(&i3ipc::reply::WindowProperty::Instance)
-                                    .map(|v| v.as_str())
-                            },
-                        ))
-                    })
-                    .unwrap_or_default(),
-                Self::OldClass(v) => event
-                    .old
-                    .as_ref()
-                    .map(|container| {
-                        v.matches_option(container.window_properties.as_ref().and_then(
-                            |window_properties| {
-                                window_properties
-                                    .get(&i3ipc::reply::WindowProperty::Class)
-                                    .map(|v| v.as_str())
-                            },
-                        ))
-                    })
-                    .unwrap_or_default(),
-                Self::OldWindowRole(v) => event
-                    .old
-                    .as_ref()
-                    .map(|container| {
-                        v.matches_option(container.window_properties.as_ref().and_then(
-                            |window_properties| {
-                                window_properties
-                                    .get(&i3ipc::reply::WindowProperty::WindowRole)
-                                    .map(|v| v.as_str())
-                            },
-                        ))
-                    })
-                    .unwrap_or_default(),
-                Self::OldTransientFor(v) => event
-                    .old
-                    .as_ref()
-                    .map(|container| {
-                        v.matches_option(container.window_properties.as_ref().and_then(
-                            |window_properties| {
-                                window_properties
-                                    .get(&i3ipc::reply::WindowProperty::TransientFor)
-                                    .map(|v| v.as_str())
-                            },
-                        ))
-                    })
-                    .unwrap_or_default(),
-                Self::OldMachine(v) => event
-                    .old
-                    .as_ref()
-                    .map(|container| {
-                        v.matches_option(container.window_properties.as_ref().and_then(
-                            |window_properties| {
-                                window_properties
-                                    .get(&i3ipc::reply::WindowProperty::Machine)
-                                    .map(|v| v.as_str())
-                            },
-                        ))
-                    })
-                    .unwrap_or_default(),
-                Self::OldMark(v) => event
-                    .old
-                    .as_ref()
-                    .map(|container| {
-                        v.matches_option(container.window_properties.as_ref().and_then(
-                            |window_properties| {
-                                window_properties
-                                    .get(&i3ipc::reply::WindowProperty::Mark)
-                                    .map(|v| v.as_str())
-                            },
-                        ))
-                    })
-                    .unwrap_or_default(),
-
+                Self::OldTitle(v) => v.matches_option(super::get_opt_window_property(
+                    &event.old,
+                    i3ipc::reply::WindowProperty::Title,
+                )),
+                Self::OldInstance(v) => v.matches_option(super::get_opt_window_property(
+                    &event.old,
+                    i3ipc::reply::WindowProperty::Instance,
+                )),
+                Self::OldClass(v) => v.matches_option(super::get_opt_window_property(
+                    &event.old,
+                    i3ipc::reply::WindowProperty::Class,
+                )),
+                Self::OldWindowRole(v) => v.matches_option(super::get_opt_window_property(
+                    &event.old,
+                    i3ipc::reply::WindowProperty::WindowRole,
+                )),
+                Self::OldTransientFor(v) => v.matches_option(super::get_opt_window_property(
+                    &event.old,
+                    i3ipc::reply::WindowProperty::TransientFor,
+                )),
+                Self::OldMachine(v) => v.matches_option(super::get_opt_window_property(
+                    &event.old,
+                    i3ipc::reply::WindowProperty::Machine,
+                )),
+                Self::OldMark(v) => v.matches_option(super::get_opt_window_property(
+                    &event.old,
+                    i3ipc::reply::WindowProperty::Mark,
+                )),
                 Self::CurrentName(v) => event
                     .current
                     .as_ref()
@@ -657,97 +577,34 @@ pub mod workspace {
                     .as_ref()
                     .map(|container| *v == container.sticky)
                     .unwrap_or_default(),
-                Self::CurrentTitle(v) => event
-                    .current
-                    .as_ref()
-                    .map(|container| {
-                        v.matches_option(container.window_properties.as_ref().and_then(
-                            |window_properties| {
-                                window_properties
-                                    .get(&i3ipc::reply::WindowProperty::Title)
-                                    .map(|v| v.as_str())
-                            },
-                        ))
-                    })
-                    .unwrap_or_default(),
-                Self::CurrentInstance(v) => event
-                    .current
-                    .as_ref()
-                    .map(|container| {
-                        v.matches_option(container.window_properties.as_ref().and_then(
-                            |window_properties| {
-                                window_properties
-                                    .get(&i3ipc::reply::WindowProperty::Instance)
-                                    .map(|v| v.as_str())
-                            },
-                        ))
-                    })
-                    .unwrap_or_default(),
-                Self::CurrentClass(v) => event
-                    .current
-                    .as_ref()
-                    .map(|container| {
-                        v.matches_option(container.window_properties.as_ref().and_then(
-                            |window_properties| {
-                                window_properties
-                                    .get(&i3ipc::reply::WindowProperty::Class)
-                                    .map(|v| v.as_str())
-                            },
-                        ))
-                    })
-                    .unwrap_or_default(),
-                Self::CurrentWindowRole(v) => event
-                    .current
-                    .as_ref()
-                    .map(|container| {
-                        v.matches_option(container.window_properties.as_ref().and_then(
-                            |window_properties| {
-                                window_properties
-                                    .get(&i3ipc::reply::WindowProperty::WindowRole)
-                                    .map(|v| v.as_str())
-                            },
-                        ))
-                    })
-                    .unwrap_or_default(),
-                Self::CurrentTransientFor(v) => event
-                    .current
-                    .as_ref()
-                    .map(|container| {
-                        v.matches_option(container.window_properties.as_ref().and_then(
-                            |window_properties| {
-                                window_properties
-                                    .get(&i3ipc::reply::WindowProperty::TransientFor)
-                                    .map(|v| v.as_str())
-                            },
-                        ))
-                    })
-                    .unwrap_or_default(),
-                Self::CurrentMachine(v) => event
-                    .current
-                    .as_ref()
-                    .map(|container| {
-                        v.matches_option(container.window_properties.as_ref().and_then(
-                            |window_properties| {
-                                window_properties
-                                    .get(&i3ipc::reply::WindowProperty::Machine)
-                                    .map(|v| v.as_str())
-                            },
-                        ))
-                    })
-                    .unwrap_or_default(),
-                Self::CurrentMark(v) => event
-                    .current
-                    .as_ref()
-                    .map(|container| {
-                        v.matches_option(container.window_properties.as_ref().and_then(
-                            |window_properties| {
-                                window_properties
-                                    .get(&i3ipc::reply::WindowProperty::Mark)
-                                    .map(|v| v.as_str())
-                            },
-                        ))
-                    })
-                    .unwrap_or_default(),
+                Self::CurrentTitle(v) => v.matches_option(super::get_opt_window_property(
+                    &event.current,
+                    i3ipc::reply::WindowProperty::Title,
+                )),
+                Self::CurrentInstance(v) => v.matches_option(super::get_opt_window_property(
+                    &event.current,
+                    i3ipc::reply::WindowProperty::Instance,
+                )),
+                Self::CurrentClass(v) => v.matches_option(super::get_opt_window_property(
+                    &event.current,
+                    i3ipc::reply::WindowProperty::Class,
+                )),
+                Self::CurrentWindowRole(v) => v.matches_option(super::get_opt_window_property(
+                    &event.current,
+                    i3ipc::reply::WindowProperty::WindowRole,
+                )),
+                Self::CurrentTransientFor(v) => v.matches_option(super::get_opt_window_property(
+                    &event.current,
+                    i3ipc::reply::WindowProperty::TransientFor,
+                )),
+                Self::CurrentMachine(v) => v.matches_option(super::get_opt_window_property(
+                    &event.current,
+                    i3ipc::reply::WindowProperty::Machine,
+                )),
+                Self::CurrentMark(v) => v.matches_option(super::get_opt_window_property(
+                    &event.current,
+                    i3ipc::reply::WindowProperty::Mark,
+                )),
             }
         }
     }
