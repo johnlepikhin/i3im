@@ -273,7 +273,7 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "clap",
- "i3ipc",
+ "i3ipc-jl",
  "regex",
  "serde",
  "serde_json",
@@ -290,9 +290,10 @@ dependencies = [
 ]
 
 [[package]]
-name = "i3ipc"
-version = "0.11.1"
-source = "git+https://github.com/johnlepikhin/i3ipc-rs#1cbad90939be2ef1577b7c1fff8545308090dd6d"
+name = "i3ipc-jl"
+version = "0.11.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "149fb4c02307d277e39fd7f19cd6f4ab6a7d0bb2b98d9d19f10de525967f84d1"
 dependencies = [
  "byteorder",
  "log",

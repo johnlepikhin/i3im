@@ -8,7 +8,7 @@ mod event_action {
 
     fn make_container_env_map(
         prefix: &str,
-        container: &i3ipc::reply::Node,
+        container: &i3ipc_jl::reply::Node,
     ) -> HashMap<String, String> {
         let mut r = HashMap::new();
 
@@ -54,7 +54,7 @@ mod event_action {
                 .as_ref()
                 .and_then(|window_properties| {
                     window_properties
-                        .get(&i3ipc::reply::WindowProperty::Title)
+                        .get(&i3ipc_jl::reply::WindowProperty::Title)
                         .cloned()
                 })
                 .unwrap_or_default(),
@@ -66,7 +66,7 @@ mod event_action {
                 .as_ref()
                 .and_then(|window_properties| {
                     window_properties
-                        .get(&i3ipc::reply::WindowProperty::Class)
+                        .get(&i3ipc_jl::reply::WindowProperty::Class)
                         .cloned()
                 })
                 .unwrap_or_default(),
@@ -78,7 +78,7 @@ mod event_action {
                 .as_ref()
                 .and_then(|window_properties| {
                     window_properties
-                        .get(&i3ipc::reply::WindowProperty::Instance)
+                        .get(&i3ipc_jl::reply::WindowProperty::Instance)
                         .cloned()
                 })
                 .unwrap_or_default(),
@@ -90,7 +90,7 @@ mod event_action {
                 .as_ref()
                 .and_then(|window_properties| {
                     window_properties
-                        .get(&i3ipc::reply::WindowProperty::WindowRole)
+                        .get(&i3ipc_jl::reply::WindowProperty::WindowRole)
                         .cloned()
                 })
                 .unwrap_or_default(),
@@ -102,7 +102,7 @@ mod event_action {
                 .as_ref()
                 .and_then(|window_properties| {
                     window_properties
-                        .get(&i3ipc::reply::WindowProperty::TransientFor)
+                        .get(&i3ipc_jl::reply::WindowProperty::TransientFor)
                         .cloned()
                 })
                 .unwrap_or_default(),
@@ -114,7 +114,7 @@ mod event_action {
                 .as_ref()
                 .and_then(|window_properties| {
                     window_properties
-                        .get(&i3ipc::reply::WindowProperty::Machine)
+                        .get(&i3ipc_jl::reply::WindowProperty::Machine)
                         .cloned()
                 })
                 .unwrap_or_default(),
@@ -126,7 +126,7 @@ mod event_action {
                 .as_ref()
                 .and_then(|window_properties| {
                     window_properties
-                        .get(&i3ipc::reply::WindowProperty::Mark)
+                        .get(&i3ipc_jl::reply::WindowProperty::Mark)
                         .cloned()
                 })
                 .unwrap_or_default(),
@@ -142,11 +142,11 @@ mod event_action {
         r
     }
 
-    fn make_env_map(event: &i3ipc::event::Event) -> HashMap<String, String> {
+    fn make_env_map(event: &i3ipc_jl::event::Event) -> HashMap<String, String> {
         let mut r = HashMap::new();
         r.insert("I3IM_EVENT".to_owned(), "1".to_owned());
 
-        use i3ipc::event::Event;
+        use i3ipc_jl::event::Event;
         match event {
             Event::WindowEvent(e) => {
                 use crate::event_processor::config::window;
@@ -178,7 +178,7 @@ mod event_action {
     }
 
     pub fn run_action(
-        event: &i3ipc::event::Event,
+        event: &i3ipc_jl::event::Event,
         action: &event_action::EventAction,
     ) -> Result<()> {
         match action {
@@ -205,7 +205,7 @@ mod window_handler {
 
     fn check_condition_list(
         condition_list: &[WindowEventConditionWrapper],
-        event: &i3ipc::event::WindowEventInfo,
+        event: &i3ipc_jl::event::WindowEventInfo,
     ) -> bool {
         for condition in condition_list {
             if !condition.0.matches(event) {
@@ -219,8 +219,8 @@ mod window_handler {
 
     pub fn handle_event(
         state: &crate::state::State,
-        event: &i3ipc::event::Event,
-        window_event: &i3ipc::event::WindowEventInfo,
+        event: &i3ipc_jl::event::Event,
+        window_event: &i3ipc_jl::event::WindowEventInfo,
     ) -> Result<()> {
         state.with_config(|config| {
             for handler in &config.window_event_handlers {
@@ -240,7 +240,7 @@ mod workspace_handler {
 
     fn check_condition_list(
         condition_list: &[WorkspaceEventCondition],
-        event: &i3ipc::event::WorkspaceEventInfo,
+        event: &i3ipc_jl::event::WorkspaceEventInfo,
     ) -> bool {
         for condition in condition_list {
             if !condition.matches(event) {
@@ -253,8 +253,8 @@ mod workspace_handler {
 
     pub fn handle_event(
         state: &crate::state::State,
-        event: &i3ipc::event::Event,
-        workspace_event: &i3ipc::event::WorkspaceEventInfo,
+        event: &i3ipc_jl::event::Event,
+        workspace_event: &i3ipc_jl::event::WorkspaceEventInfo,
     ) -> Result<()> {
         state.with_config(|config| {
             for handler in &config.workspace_event_handlers {
@@ -267,8 +267,8 @@ mod workspace_handler {
     }
 }
 
-pub fn handle_event(state: &crate::state::State, event: &i3ipc::event::Event) -> Result<()> {
-    use i3ipc::event::Event;
+pub fn handle_event(state: &crate::state::State, event: &i3ipc_jl::event::Event) -> Result<()> {
+    use i3ipc_jl::event::Event;
     match event {
         Event::WindowEvent(window_event) => {
             slog_scope::debug!("Window event: {:?}", window_event);

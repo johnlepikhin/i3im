@@ -1,7 +1,7 @@
 use anyhow::Result;
 use std::collections::HashSet;
 
-fn get_i3_workspaces(state: &crate::state::State) -> Result<Vec<i3ipc::reply::Workspace>> {
+fn get_i3_workspaces(state: &crate::state::State) -> Result<Vec<i3ipc_jl::reply::Workspace>> {
     let r = state
         .with_i3connection(|conn| conn.get_workspaces())?
         .workspaces;
@@ -119,11 +119,11 @@ impl WorkspaceWithGroup {
 
 pub struct CustomWorkspace {
     workspace_with_group: WorkspaceWithGroup,
-    workspace: i3ipc::reply::Workspace,
+    workspace: i3ipc_jl::reply::Workspace,
 }
 
 impl CustomWorkspace {
-    pub fn of_i3_workspace(workspace: i3ipc::reply::Workspace) -> Self {
+    pub fn of_i3_workspace(workspace: i3ipc_jl::reply::Workspace) -> Self {
         CustomWorkspace {
             workspace_with_group: WorkspaceWithGroup::of_i3_workspace(&workspace.name),
             workspace,
