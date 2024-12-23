@@ -14,7 +14,7 @@ Main features include:
 
 # Installation
 
-The project is not yet published on crates.io, so installation is only possible directly from the source.
+Currently installation is only possible directly from the source.
 
 Install Rust:
 
@@ -25,7 +25,7 @@ curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 Install the project:
 
 ```bash
-cargo install --git https://github.com/johnlepikhin/i3im
+cargo install i3im
 ```
 
 # Getting started

@@ -14,7 +14,7 @@
 
 # Установка
 
-В данный момент проект не опубликован на crates.io, поэтому установка возможна только из исходников напрямую.
+В данный установка возможна только из исходников.
 
 Установите Rust:
 
@@ -25,7 +25,7 @@ curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 Установите проект:
 
 ```bash
-cargo install --git https://github.com/johnlepikhin/i3im
+cargo install i3im
 ```
 
 # С чего начать
