@@ -1,5 +1,5 @@
 [package]
-authors = ["Evgenii Lepikhin <e.lepihin@postgrespro.ru>"]
+authors = ["Evgenii Lepikhin <johnlepikhin@gmail.com>"]
 edition = "2021"
 name = "i3im"
 version = "0.1.1"
