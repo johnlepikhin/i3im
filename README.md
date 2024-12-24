@@ -54,6 +54,17 @@ bindsym $mod+8 exec i3im focus workspace 8
 bindsym $mod+9 exec i3im focus workspace 9
 bindsym $mod+0 exec i3im focus workspace 10
 
+bindsym $mod+Shift+1 exec i3im move window-to-group-workspace 1
+bindsym $mod+Shift+2 exec i3im move window-to-group-workspace 2
+bindsym $mod+Shift+3 exec i3im move window-to-group-workspace 3
+bindsym $mod+Shift+4 exec i3im move window-to-group-workspace 4
+bindsym $mod+Shift+5 exec i3im move window-to-group-workspace 5
+bindsym $mod+Shift+6 exec i3im move window-to-group-workspace 6
+bindsym $mod+Shift+7 exec i3im move window-to-group-workspace 7
+bindsym $mod+Shift+8 exec i3im move window-to-group-workspace 8
+bindsym $mod+Shift+9 exec i3im move window-to-group-workspace 9
+bindsym $mod+Shift+0 exec i3im move window-to-group-workspace 10
+
 bindsym $mod+Shift+s exec i3im focus wm-workspace "`i3im list wm-workspaces | rofi -dmenu -p 'Switch to workspace'`"
 ```
 
