@@ -1,3 +1,5 @@
+use std::collections::HashSet;
+
 use anyhow::Result;
 use clap::{Args, Subcommand};
 
@@ -8,30 +10,34 @@ pub struct FocusGroup {
 
 impl FocusGroup {
     pub fn run(&self, state: crate::state::State) -> Result<()> {
-        crate::workspace_group::Group::new(&self.name).focus(&state)
+        let group = if self.name.is_empty() {
+            None
+        } else {
+            Some(self.name.as_str())
+        };
+        crate::workspace_group::focus_group(&state, group)
     }
 }
 
 #[derive(Args)]
 pub struct FocusWorkspace {
-    name: String,
+    group_workspace: i64,
 }
 
 impl FocusWorkspace {
     pub fn run(&self, state: crate::state::State) -> Result<()> {
-        let focused = crate::workspace_group::CustomWorkspace::get_focused(&state)?;
-        focused.with_name(&self.name).focus(&state)
+        crate::workspace_group::focus_group_workspace(&state, self.group_workspace)
     }
 }
 
 #[derive(Args)]
-pub struct FocusWmWorkspace {
+pub struct FocusI3Workspace {
     name: String,
 }
 
-impl FocusWmWorkspace {
+impl FocusI3Workspace {
     pub fn run(&self, state: crate::state::State) -> Result<()> {
-        crate::workspace_group::CustomWorkspace::of_i3_workspace_name(&state, &self.name)?
+        crate::workspace_group::Workspace::of_i3_workspace_name(&state, &self.name)?
             .focus(&state)
     }
 }
@@ -40,7 +46,7 @@ impl FocusWmWorkspace {
 pub enum Focus {
     Group(FocusGroup),
     Workspace(FocusWorkspace),
-    WmWorkspace(FocusWmWorkspace),
+    WmWorkspace(FocusI3Workspace),
 }
 
 impl Focus {
@@ -63,14 +69,17 @@ impl List {
     pub fn run(&self, state: crate::state::State) -> Result<()> {
         match self {
             List::Groups => {
-                let list = crate::workspace_group::Group::list(&state)?;
-                for group in list {
-                    println!("{}", group.name());
+                let groups = crate::workspace_group::WorkspaceID::list(&state)?
+                    .into_iter()
+                    .map(|v| v.group().cloned())
+                    .collect::<HashSet<_>>();
+                for group in groups {
+                    println!("{}", group.unwrap_or_default())
                 }
                 Ok(())
             }
             List::WmWorkspaces => {
-                let list = crate::workspace_group::CustomWorkspace::list(&state)?;
+                let list = crate::workspace_group::WorkspaceID::list(&state)?;
                 for workspace in list {
                     println!("{}", workspace.i3_workspace_name());
                 }
@@ -90,12 +99,11 @@ impl RenameGroup {
         let new_group = if self.name.is_empty() {
             None
         } else {
-            Some(crate::workspace_group::Group::new(&self.name))
+            Some(self.name.as_str())
         };
-        let old_group = crate::workspace_group::CustomWorkspace::get_focused(&state)?
-            .group()
-            .clone();
-        crate::workspace_group::rename_group(&state, &old_group, new_group)
+        let focused_workspace = crate::workspace_group::Workspace::get_focused(&state)?;
+        let old_group = focused_workspace.id().group().map(|v| v.as_str());
+        crate::workspace_group::rename_group(&state, old_group, new_group)
     }
 }
 
@@ -108,6 +116,43 @@ impl Rename {
     pub fn run(&self, state: crate::state::State) -> Result<()> {
         match self {
             Rename::Group(group) => group.run(state),
+        }
+    }
+}
+
+#[derive(Args)]
+pub struct MoveWindowToGroupWorkspace {
+    pub workspace: i64,
+}
+
+impl MoveWindowToGroupWorkspace {
+    pub fn run(&self, state: crate::state::State) -> Result<()> {
+        crate::workspace_group::move_window_to_group_workspace(&state, self.workspace)
+    }
+}
+
+#[derive(Args)]
+pub struct MoveWindowToWorkspace {
+    pub workspace: String,
+}
+
+impl MoveWindowToWorkspace {
+    pub fn run(&self, state: crate::state::State) -> Result<()> {
+        crate::workspace_group::move_window_to_workspace(&state, &self.workspace)
+    }
+}
+
+#[derive(Subcommand)]
+pub enum Move {
+    WindowToGroupWorkspace(MoveWindowToGroupWorkspace),
+    WindowToWorkspace(MoveWindowToWorkspace),
+}
+
+impl Move {
+    pub fn run(&self, state: crate::state::State) -> Result<()> {
+        match self {
+            Move::WindowToGroupWorkspace(cmd) => cmd.run(state),
+            Move::WindowToWorkspace(cmd) => cmd.run(state),
         }
     }
 }

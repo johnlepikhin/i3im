@@ -71,6 +71,9 @@ enum CommandLine {
     /// Rename operations
     #[command(subcommand)]
     Rename(crate::commands::Rename),
+    /// Move operations
+    #[command(subcommand)]
+    Move(crate::commands::Move),
     /// Run listener
     Listen(crate::listener::ListenerCmd),
 }
@@ -139,21 +142,25 @@ impl Application {
 
     fn run_command(&self) -> Result<()> {
         match &self.command {
-            CommandLine::Config(v) => {
-                v.run(&self.config_path);
+            CommandLine::Config(cmd) => {
+                cmd.run(&self.config_path);
                 Ok(())
             }
-            CommandLine::Focus(focus) => {
+            CommandLine::Focus(cmd) => {
                 let state = self.init_state()?;
-                focus.run(state)
+                cmd.run(state)
             }
-            CommandLine::List(list) => {
+            CommandLine::List(cmd) => {
                 let state = self.init_state()?;
-                list.run(state)
+                cmd.run(state)
             }
-            CommandLine::Rename(rename) => {
+            CommandLine::Rename(cmd) => {
                 let state = self.init_state()?;
-                rename.run(state)
+                cmd.run(state)
+            }
+            CommandLine::Move(cmd) => {
+                let state = self.init_state()?;
+                cmd.run(state)
             }
             CommandLine::Listen(listener) => {
                 let state = self.init_state()?;
