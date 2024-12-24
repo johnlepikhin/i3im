@@ -5,7 +5,7 @@ log_level: Info
 window_event_handlers:
   # Execute shell command when window becomes fullscreen
   - condition_list:
-      - EventType: FullscreenMode
+      - EventType: [FullscreenMode]
       - NodeFullscreenMode: Fullscreen
     action:
       ShellCommand:
@@ -13,7 +13,7 @@ window_event_handlers:
 
   # Execute shell command when window exits fullscreen
   - condition_list:
-      - EventType: FullscreenMode
+      - EventType: [FullscreenMode]
       - NodeFullscreenMode: None
     action:
       ShellCommand:
@@ -21,7 +21,7 @@ window_event_handlers:
 
   # Execute shell command when window title matches regex
   - condition_list:
-      - EventType: New
+      - EventType: [New]
       - Title:
           Regex:
             regex: 'jitsi.*is sharing'
@@ -31,7 +31,7 @@ window_event_handlers:
 
 workspace_event_handlers:
   - condition_list:
-      - EventType: Focus
+      - EventType: [Focus]
     action:
       ShellCommand:
         command: ~/.config/i3/scripts/brightness_autoset.sh 100

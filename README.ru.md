@@ -105,7 +105,7 @@ window_event_handlers:
   # Обработчик события на переход окна в полноэкранный режим
   - condition_list:
       # Тип события: изменение полноэкранного режима
-      - EventType: FullscreenMode
+      - EventType: [ FullscreenMode ]
       # Новый статус полноэкранного режима: активирован
       - NodeFullscreenMode: Fullscreen
     action:
@@ -116,7 +116,7 @@ window_event_handlers:
   # Обработчик события на выход окна из полноэкранного режима
   - condition_list:
       # Тип события: изменение полноэкранного режима
-      - EventType: FullscreenMode
+      - EventType: [ FullscreenMode ]
       # Новый статус полноэкранного режима: не активен
       - NodeFullscreenMode: None
     action:
@@ -154,7 +154,7 @@ brightnessctl set "${BRIGHTNESS}%"
 window_event_handlers:
   - condition_list:
       # Тип события: создание нового окна
-      - EventType: New
+      - EventType: [ New ]
       # Заголовок окна должен совпадать с регулярным выражением
       - Title:
           Regex:

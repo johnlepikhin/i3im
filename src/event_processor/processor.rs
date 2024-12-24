@@ -234,16 +234,15 @@ mod window_handler {
 }
 
 mod workspace_handler {
-    use crate::event_processor::config::workspace;
+    use crate::event_processor::config::workspace::WorkspaceEventConditionWrapper;
     use anyhow::Result;
-    use workspace::WorkspaceEventCondition;
 
     fn check_condition_list(
-        condition_list: &[WorkspaceEventCondition],
+        condition_list: &[WorkspaceEventConditionWrapper],
         event: &i3ipc_jl::event::WorkspaceEventInfo,
     ) -> bool {
         for condition in condition_list {
-            if !condition.matches(event) {
+            if !condition.0.matches(event) {
                 return false;
             }
         }

@@ -285,7 +285,7 @@ pub mod window {
     #[derive(Clone, Serialize, Deserialize, StructDoc)]
     pub enum WindowEventCondition {
         /// Window event type
-        EventType(#[serde(with = "serde_yaml::with::singleton_map")] WindowEventType),
+        EventType(Vec<WindowEventType>),
         /// Container name
         Name(#[serde(with = "serde_yaml::with::singleton_map")] StringMatch),
         /// Container type
@@ -324,7 +324,7 @@ pub mod window {
     impl WindowEventCondition {
         pub fn matches(&self, event: &i3ipc_jl::event::WindowEventInfo) -> bool {
             match self {
-                Self::EventType(v) => v.matches(&event.change),
+                Self::EventType(v) => v.iter().any(|v| v.matches(&event.change)),
                 Self::Name(v) => v.matches_option(event.container.name.as_deref()),
                 Self::NodeType(v) => v.matches(&event.container),
                 Self::NodeLayout(v) => v.matches(&event.container),
@@ -373,6 +373,7 @@ pub mod window {
 
     #[derive(Clone, Serialize, Deserialize, StructDoc)]
     pub struct WindowEventHandler {
+        #[serde(with = "serde_yaml::with::singleton_map")]
         pub condition_list: Vec<WindowEventConditionWrapper>,
         #[serde(with = "serde_yaml::with::singleton_map")]
         pub action: super::event_action::EventAction,
@@ -426,9 +427,15 @@ pub mod workspace {
         }
     }
 
+    #[derive(Deserialize, Serialize, Clone, StructDoc)]
+    #[serde(transparent)]
+    struct WorkspaceEventTypeWrapper(
+        #[serde(with = "serde_yaml::with::singleton_map")] pub WorkspaceEventType,
+    );
+
     #[derive(Clone, Serialize, Deserialize, StructDoc)]
     pub enum WorkspaceEventCondition {
-        EventType(#[serde(with = "serde_yaml::with::singleton_map")] WorkspaceEventType),
+        EventType(Vec<WorkspaceEventType>),
         OldName(#[serde(with = "serde_yaml::with::singleton_map")] StringMatch),
         OldNodeType(#[serde(with = "serde_yaml::with::singleton_map")] NodeType),
         OldNodeLayout(#[serde(with = "serde_yaml::with::singleton_map")] NodeLayout),
@@ -468,7 +475,7 @@ pub mod workspace {
     impl WorkspaceEventCondition {
         pub fn matches(&self, event: &i3ipc_jl::event::WorkspaceEventInfo) -> bool {
             match self {
-                Self::EventType(v) => v.matches(&event.change),
+                Self::EventType(v) => v.iter().any(|v| v.matches(&event.change)),
                 Self::OldName(v) => event
                     .old
                     .as_ref()
@@ -609,9 +616,15 @@ pub mod workspace {
         }
     }
 
+    #[derive(Deserialize, Serialize, Clone, StructDoc)]
+    #[serde(transparent)]
+    pub struct WorkspaceEventConditionWrapper(
+        #[serde(with = "serde_yaml::with::singleton_map")] pub WorkspaceEventCondition,
+    );
+
     #[derive(Clone, Serialize, Deserialize, StructDoc)]
     pub struct WorkspaceEventHandler {
-        pub condition_list: Vec<WorkspaceEventCondition>,
+        pub condition_list: Vec<WorkspaceEventConditionWrapper>,
         pub action: super::event_action::EventAction,
     }
 }

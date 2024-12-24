@@ -104,7 +104,7 @@ window_event_handlers:
   # Event handler for entering fullscreen mode
   - condition_list:
       # Event type: fullscreen mode change
-      - EventType: FullscreenMode
+      - EventType: [ FullscreenMode ]
       # New fullscreen mode status: activated
       - NodeFullscreenMode: Fullscreen
     action:
@@ -115,7 +115,7 @@ window_event_handlers:
   # Event handler for exiting fullscreen mode
   - condition_list:
       # Event type: fullscreen mode change
-      - EventType: FullscreenMode
+      - EventType: [ FullscreenMode ]
       # New fullscreen mode status: not activated
       - NodeFullscreenMode: None
     action:
@@ -153,7 +153,7 @@ You can automatically close it using the following workaround:
 window_event_handlers:
   - condition_list:
       # Event type: creation of a new window
-      - EventType: New
+      - EventType: [ New ]
       # The window title must match the regular expression
       - Title:
           Regex:
