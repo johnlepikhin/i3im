@@ -19,7 +19,7 @@ serde_json = "1.0"
 serde_regex = "1.1.0"
 serde_yaml = "0.9"
 shellexpand = "3.1.0"
-slog = "2.7"
+slog = { version = "2.7", features = ["release_max_level_trace"] }
 slog-envlogger = "2.2"
 slog-scope = "4.4"
 slog-stdlog = "4.1.1"
