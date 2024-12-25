@@ -194,6 +194,15 @@ impl WorkspaceID {
             .map_err(anyhow::Error::from)
     }
 
+    pub fn move_container_to(&self, state: &crate::state::State) -> Result<()> {
+        state
+            .run_i3_command(&format!(
+                "move container to workspace {}",
+                self.i3_workspace_name()
+            ))
+            .map_err(anyhow::Error::from)
+    }
+
     pub fn cmp_group_and_workspace(&self, other: &Self) -> std::cmp::Ordering {
         use std::cmp::Ordering;
         let r = self.group().cmp(&other.group());
@@ -333,15 +342,28 @@ pub fn rename_group(
     reassign_i3_ids(state)
 }
 
-pub fn move_window_to_group_workspace(state: &crate::state::State, workspace: i64) -> Result<()> {
-    let new_id = Workspace::get_focused(state)?
+pub fn move_window_to_group_workspace(
+    state: &crate::state::State,
+    group_workspace: i64,
+) -> Result<()> {
+    let workspaces = Workspace::list(state)?;
+    let focused = workspaces
+        .iter()
+        .find(|w| w.workspace.focused)
+        .ok_or(anyhow::anyhow!("No focused workspace"))?;
+    let existing = workspaces.iter().find(|ws| {
+        ws.id().group() == focused.id().group()
+            && ws.id().group_workspace() == Some(group_workspace)
+    });
+    if let Some(existing) = existing {
+        return existing.id().move_container_to(state);
+    }
+    focused
         .id()
         .clone()
-        .with_group_workspace(workspace);
-    state.run_i3_command(&format!(
-        "move container to workspace {}",
-        new_id.i3_workspace_name()
-    ))
+        .with_group_workspace(group_workspace)
+        .move_container_to(state)?;
+    reassign_i3_ids(state)
 }
 
 pub fn move_window_to_workspace(state: &crate::state::State, id: &str) -> Result<()> {
