@@ -12,17 +12,17 @@ readme = "README.md"
 [dependencies]
 anyhow = "1.0"
 clap = {version = "4.0", features = ["derive"]}
-i3ipc-jl = { version = "0.11.2", features = ["i3-4-14"] }
-regex = "1.11.1"
+i3ipc-jl = { version = "0.11", features = ["i3-4-14"] }
+regex = "1.11"
 serde = {version = "1.0", features = ["derive"]}
 serde_json = "1.0"
-serde_regex = "1.1.0"
+serde_regex = "1.1"
 serde_yaml = "0.9"
-shellexpand = "3.1.0"
+shellexpand = "3.1"
 slog = { version = "2.7", features = ["release_max_level_trace"] }
 slog-envlogger = "2.2"
 slog-scope = "4.4"
-slog-stdlog = "4.1.1"
-slog-syslog-jl = "0.13.1"
-slog-term = "2.9.1"
-structdoc = "0.1.4"
+slog-stdlog = "4.1"
+slog-syslog-jl = "0.13"
+slog-term = "2.9"
+structdoc = "0.1"
