@@ -2,7 +2,7 @@
 authors = ["Evgenii Lepikhin <johnlepikhin@gmail.com>"]
 edition = "2021"
 name = "i3im"
-version = "0.1.1"
+version = "0.1.2"
 rust-version = "1.65"
 license = "MIT"
 description = "The utility extends the standard functionality of the i3 and Sway window managers."
