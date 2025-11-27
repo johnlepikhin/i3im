@@ -1,5 +1,8 @@
 use anyhow::Result;
 
+/// Default workspace number when no history is available
+const DEFAULT_WORKSPACE: i64 = 1;
+
 fn get_i3_workspaces(state: &crate::state::State) -> Result<Vec<i3ipc_jl::reply::Workspace>> {
     let r = state
         .with_i3connection(|conn| conn.get_workspaces())?
@@ -135,6 +138,16 @@ impl WorkspaceID {
         }
     }
 
+    /// Returns the effective workspace number: group_workspace if available, otherwise i3_id
+    pub fn effective_workspace_number(&self) -> Option<i64> {
+        self.group_workspace().or_else(|| self.i3_id())
+    }
+
+    /// Checks if this workspace belongs to the given group
+    pub fn group_matches(&self, group: Option<&str>) -> bool {
+        self.group().map(|s| s.as_str()) == group
+    }
+
     fn of_triplet(i3_id: &str, group_name: &str, group_workspace: &str) -> Self {
         match (
             i3_id.parse::<i64>().ok(),
@@ -185,22 +198,18 @@ impl WorkspaceID {
     }
 
     pub fn rename(&self, state: &crate::state::State, new_id: &Self) -> Result<()> {
-        state
-            .run_i3_command(&format!(
-                "rename workspace \"{}\" to \"{}\"",
-                self.i3_workspace_name(),
-                new_id.i3_workspace_name()
-            ))
-            .map_err(anyhow::Error::from)
+        state.run_i3_command(&format!(
+            "rename workspace \"{}\" to \"{}\"",
+            self.i3_workspace_name(),
+            new_id.i3_workspace_name()
+        ))
     }
 
     pub fn move_container_to(&self, state: &crate::state::State) -> Result<()> {
-        state
-            .run_i3_command(&format!(
-                "move container to workspace {}",
-                self.i3_workspace_name()
-            ))
-            .map_err(anyhow::Error::from)
+        state.run_i3_command(&format!(
+            "move container to workspace {}",
+            self.i3_workspace_name()
+        ))
     }
 
     pub fn cmp_group_and_workspace(&self, other: &Self) -> std::cmp::Ordering {
@@ -212,9 +221,6 @@ impl WorkspaceID {
         self.group_workspace().cmp(&other.group_workspace())
     }
 
-    pub fn eq_group_and_workspace(&self, other: &Self) -> bool {
-        self.cmp_group_and_workspace(other) == std::cmp::Ordering::Equal
-    }
 }
 
 pub struct Workspace {
@@ -241,22 +247,6 @@ impl Workspace {
 
     pub fn id(&self) -> &WorkspaceID {
         &self.workspace_with_group
-    }
-
-    pub fn with_group(self, group: Option<&str>) -> Self {
-        Workspace {
-            workspace_with_group: self.workspace_with_group.with_group(group),
-            workspace: self.workspace,
-        }
-    }
-
-    pub fn with_group_workspace(self, group_workspace: i64) -> Self {
-        Workspace {
-            workspace_with_group: self
-                .workspace_with_group
-                .with_group_workspace(group_workspace),
-            workspace: self.workspace,
-        }
     }
 
     pub fn focus(&self, state: &crate::state::State) -> Result<()> {
@@ -303,19 +293,89 @@ pub fn reassign_i3_ids(state: &crate::state::State) -> Result<()> {
 }
 
 pub fn focus_group(state: &crate::state::State, group: Option<&str>) -> Result<()> {
-    let workspaces = Workspace::list(state)?;
-    for workspace in workspaces {
-        if workspace.id().group().map(|v| v.as_str()) != group {
-            continue;
-        }
+    slog_scope::debug!("focus_group called with group={:?}", group);
 
-        return workspace.id().focus(state);
+    // Get all workspaces in a single IPC call
+    let workspaces = Workspace::list(state)?;
+
+    // Find currently focused workspace
+    let current = workspaces
+        .iter()
+        .find(|w| w.workspace.focused)
+        .ok_or_else(|| anyhow::anyhow!("No focused workspace"))?;
+
+    slog_scope::debug!(
+        "Current focused workspace: name={}, group={:?}, group_workspace={:?}",
+        current.id().i3_workspace_name(),
+        current.id().group(),
+        current.id().group_workspace()
+    );
+
+    // Get target workspace number, saving current workspace state in the same operation
+    let target_workspace = if let Some(current_ws_num) = current.id().effective_workspace_number() {
+        slog_scope::debug!(
+            "Saving current workspace: group={:?}, ws_num={}",
+            current.id().group(),
+            current_ws_num
+        );
+        state
+            .update_and_get_last_workspace(
+                current.id().group().map(|s| s.as_str()),
+                current_ws_num,
+                group,
+            )
+            .unwrap_or(DEFAULT_WORKSPACE)
+    } else {
+        slog_scope::debug!("Current workspace has no effective number, not saving");
+        state.get_last_workspace(group).unwrap_or(DEFAULT_WORKSPACE)
+    };
+
+    slog_scope::debug!(
+        "Target workspace for group {:?}: {}",
+        group,
+        target_workspace
+    );
+
+    slog_scope::debug!("All workspaces:");
+    for ws in &workspaces {
+        slog_scope::debug!(
+            "  - name={}, group={:?}, group_workspace={:?}",
+            ws.id().i3_workspace_name(),
+            ws.id().group(),
+            ws.id().group_workspace()
+        );
     }
 
+    // First try to find exact match (group + workspace number)
+    for workspace in &workspaces {
+        if !workspace.id().group_matches(group) {
+            continue;
+        }
+        if workspace.id().effective_workspace_number() == Some(target_workspace) {
+            slog_scope::debug!("Found exact match: {}", workspace.id().i3_workspace_name());
+            return workspace.id().focus(state);
+        }
+    }
+
+    // If exact match not found, try any workspace in the group
+    for workspace in &workspaces {
+        if workspace.id().group_matches(group) {
+            slog_scope::debug!(
+                "Found workspace in group (not exact): {}",
+                workspace.id().i3_workspace_name()
+            );
+            return workspace.id().focus(state);
+        }
+    }
+
+    // If group doesn't exist, create new workspace
     let new_id = match group {
-        Some(group_name) => WorkspaceID::GroupWithWorkspace(group_name.to_owned(), 1),
-        None => WorkspaceID::JustI3ID(1),
+        Some(group_name) => {
+            WorkspaceID::GroupWithWorkspace(group_name.to_owned(), target_workspace)
+        }
+        None => WorkspaceID::JustI3ID(target_workspace),
     };
+    slog_scope::debug!("Creating new workspace: {}", new_id.i3_workspace_name());
     new_id.focus(state)?;
     reassign_i3_ids(state)
 }
@@ -331,13 +391,11 @@ pub fn rename_group(
         }
         let new_id = workspace.id().with_group(new_group);
         workspace.id().rename(state, &new_id)?;
-        state
-            .run_i3_command(&format!(
-                "rename workspace \"{}\" to \"{}\"",
-                workspace.id().i3_workspace_name(),
-                new_id.i3_workspace_name()
-            ))
-            .map_err(anyhow::Error::from)?;
+        state.run_i3_command(&format!(
+            "rename workspace \"{}\" to \"{}\"",
+            workspace.id().i3_workspace_name(),
+            new_id.i3_workspace_name()
+        ))?;
     }
     reassign_i3_ids(state)
 }

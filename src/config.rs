@@ -46,9 +46,9 @@ impl Config {
 
     pub fn read(file: &str) -> Result<Self> {
         let config = std::fs::read_to_string(file)
-            .with_context(|| format!("Failed to load config file {:?}", file))?;
+            .with_context(|| format!("Failed to load config file {file:?}"))?;
         let config: Self = serde_yaml::from_str(&config)
-            .with_context(|| format!("Failed to parse config file {:?}", file))?;
+            .with_context(|| format!("Failed to parse config file {file:?}"))?;
 
         config.validate()?;
         Ok(config)

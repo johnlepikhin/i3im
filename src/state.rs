@@ -40,4 +40,21 @@ impl State {
         let config = self.config.lock().unwrap();
         cb(&config)
     }
+
+    // Workspace history methods - delegate to last_workspaces module
+
+    /// Updates the last workspace for current_group and returns the last workspace for target_group.
+    /// This is more efficient than separate set + get calls.
+    pub fn update_and_get_last_workspace(
+        &self,
+        current_group: Option<&str>,
+        current_workspace: i64,
+        target_group: Option<&str>,
+    ) -> Option<i64> {
+        crate::last_workspaces::update_and_get(current_group, current_workspace, target_group)
+    }
+
+    pub fn get_last_workspace(&self, group: Option<&str>) -> Option<i64> {
+        crate::last_workspaces::get_last_workspace(group)
+    }
 }

@@ -37,8 +37,7 @@ pub struct FocusI3Workspace {
 
 impl FocusI3Workspace {
     pub fn run(&self, state: crate::state::State) -> Result<()> {
-        crate::workspace_group::Workspace::of_i3_workspace_name(&state, &self.name)?
-            .focus(&state)
+        crate::workspace_group::Workspace::of_i3_workspace_name(&state, &self.name)?.focus(&state)
     }
 }
 

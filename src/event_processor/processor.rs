@@ -36,15 +36,12 @@ mod event_action {
             format!("I3IM_{prefix}CONTAINER_PERCENT"),
             container
                 .percent
-                .map(|v| format!("{}", v))
+                .map(|v| format!("{v}"))
                 .unwrap_or_default(),
         );
         r.insert(
             format!("I3IM_{prefix}CONTAINER_WINDOW_ID"),
-            container
-                .window
-                .map(|v| format!("{}", v))
-                .unwrap_or_default(),
+            container.window.map(|v| format!("{v}")).unwrap_or_default(),
         );
 
         r.insert(

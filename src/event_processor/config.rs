@@ -75,7 +75,7 @@ pub enum NodeType {
 
 impl std::fmt::Display for NodeType {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        write!(f, "{:?}", self)
+        write!(f, "{self:?}")
     }
 }
 
@@ -122,7 +122,7 @@ impl NodeLayout {
 
 impl std::fmt::Display for NodeLayout {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        write!(f, "{:?}", self)
+        write!(f, "{self:?}")
     }
 }
 
@@ -160,7 +160,7 @@ impl NodeFloating {
 
 impl std::fmt::Display for NodeFloating {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        write!(f, "{:?}", self)
+        write!(f, "{self:?}")
     }
 }
 
@@ -195,7 +195,7 @@ impl NodeFullscreenMode {
 
 impl std::fmt::Display for NodeFullscreenMode {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        write!(f, "{:?}", self)
+        write!(f, "{self:?}")
     }
 }
 
@@ -259,7 +259,7 @@ pub mod window {
 
     impl std::fmt::Display for WindowEventType {
         fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-            write!(f, "{:?}", self)
+            write!(f, "{self:?}")
         }
     }
 
@@ -407,7 +407,7 @@ pub mod workspace {
 
     impl std::fmt::Display for WorkspaceEventType {
         fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-            write!(f, "{:?}", self)
+            write!(f, "{self:?}")
         }
     }
     impl From<&i3ipc_jl::event::inner::WorkspaceChange> for WorkspaceEventType {

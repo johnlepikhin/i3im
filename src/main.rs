@@ -6,6 +6,7 @@ use structdoc::StructDoc;
 mod commands;
 mod config;
 mod event_processor;
+mod last_workspaces;
 mod listener;
 mod state;
 mod workspace_group;
